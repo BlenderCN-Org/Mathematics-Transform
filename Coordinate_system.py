@@ -17,16 +17,21 @@ def update_Cartesian(self, context):
     context.object.location.z = z
     
 #預期用來修改球座標系的函數
-def update_Sphere(self, context):
-    ob = bpy.context.scene.Cartesian_coordinate
+def update_Sphere(context):
+    ob = bpy.context.object.location
     radius = ob.length
     polar= math.degrees(math.acos(ob.z/radius))
     azimuth = math.degrees(math.atan2(ob.y,ob.x))
-    Sphere_Coordinate = context.scene.Sphere_Coordinate
+    Sphere_Coordinate = bpy.context.scene.Sphere_Coordinate
     Sphere_Coordinate.radius = radius
     Sphere_Coordinate.polar = polar
     Sphere_Coordinate.azimuth = azimuth
 
+def scene_update(context):
+    objects = bpy.data.objects
+    if objects.is_updated:
+        update_Sphere(context)
+bpy.app.handlers.scene_update_post.append(scene_update)
 
 #Cartesian coordinate
 #將放在scene下的一個PropertyGroup，用來儲存半徑、天頂角、方位角的數值
@@ -50,7 +55,7 @@ class Sphere_Coordinate(bpy.types.PropertyGroup):
        
 bpy.utils.register_class(Sphere_Coordinate)
 bpy.types.Scene.Sphere_Coordinate = bpy.props.PointerProperty(type = Sphere_Coordinate)
-bpy.types.Scene.Cartesian_Coordinate = FloatVectorProperty(subtype = 'TRANSLATION',update = update_Sphere)
+#bpy.types.Scene.Cartesian_Coordinate = FloatVectorProperty(subtype = 'TRANSLATION',update = update_Sphere)
 
 #UI部分
 class Coodinate_system_Panel(bpy.types.Panel):
