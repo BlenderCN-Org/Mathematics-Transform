@@ -28,11 +28,8 @@ def update_Sphere(context):
     Sphere_Coordinate.azimuth = azimuth
 
 def scene_update(context):
-    objects = bpy.data.objects
-    if objects.is_updated:
+    if bpy.context.active_object.is_updated:
         update_Sphere(context)
-bpy.app.handlers.scene_update_post.append(scene_update)
-
 #Cartesian coordinate
 #將放在scene下的一個PropertyGroup，用來儲存半徑、天頂角、方位角的數值
 class Sphere_Coordinate(bpy.types.PropertyGroup):
@@ -50,12 +47,6 @@ class Sphere_Coordinate(bpy.types.PropertyGroup):
         name = "φ", 
         default = 0, min = -180, max = 180,
         update = update_Cartesian)
-    
-#在Scene底下加入Sphere_coordinate的PropertyGroup         
-       
-bpy.utils.register_class(Sphere_Coordinate)
-bpy.types.Scene.Sphere_Coordinate = bpy.props.PointerProperty(type = Sphere_Coordinate)
-#bpy.types.Scene.Cartesian_Coordinate = FloatVectorProperty(subtype = 'TRANSLATION',update = update_Sphere)
 
 #UI部分
 class Coodinate_system_Panel(bpy.types.Panel):
@@ -79,10 +70,20 @@ class Coodinate_system_Panel(bpy.types.Panel):
             
 def register():
     
+    #在Scene底下加入Sphere_coordinate的PropertyGroup                
+    bpy.utils.register_class(Sphere_Coordinate)
+    bpy.types.Scene.Sphere_Coordinate = bpy.props.PointerProperty(type = Sphere_Coordinate)
+    #append scene_update
+    bpy.app.handlers.scene_update_post.append(scene_update)
     bpy.utils.register_class(Coodinate_system_Panel)
-
+    
 def unregister():
+    
+    bpy.utils.unregister_class(Sphere_Coordinate)
+    del bpy.types.Scene.Sphere_Coordinate
+    #remove scene_update
+    bpy.app.handlers.render_complete.remove(scene_update)
     bpy.utils.unregister_class(Coodinate_system_Panel)
-
+    
 if __name__ == "__main__":
     register()
