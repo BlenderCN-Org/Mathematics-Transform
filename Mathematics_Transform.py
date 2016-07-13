@@ -1,3 +1,11 @@
+bl_info = {
+    "name": "Mathematics Transform",
+    "author": "Stokes Lee",
+    "version": (0, 0,2),
+    "blender": (2, 70, 0),
+    "location": "View 3D > Properties Shelf",
+    "category": "3D View"
+}
 import bpy
 import mathutils
 import math
@@ -139,9 +147,9 @@ class Mathematics_Coordinates_System(bpy.types.PropertyGroup):
     Cylindrical_Coordinate = bpy.props.PointerProperty(type = Cylindrical_Coordinate)  
     
 #UI部分
-class Coordinate_system_Panel(bpy.types.Panel):
+class Mathematics_Transform_Panel(bpy.types.Panel):
     """Creates a Panel in the scene context of the properties editor"""
-    bl_label = "Coordinate System"
+    bl_label = "Mathematics Transform"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'  
 
@@ -175,18 +183,18 @@ def register():
 
     #append scene_update
     bpy.app.handlers.scene_update_post.append(scene_update)
-    bpy.utils.register_class(Coordinate_system_Panel)
+    bpy.utils.register_class(Mathematics_Transform_Panel)
     
 
 def unregister():    
+    del bpy.types.Scene.Mathematics_Coordinates_System
     bpy.utils.unregister_class(Sphere_Coordinate)
     bpy.utils.unregister_class(Cylindrical_Coordinate)
     bpy.utils.unregister_class(Mathematics_Coordinates_System)
-    del bpy.types.Scene.Mathematics_Coordinates_System
     
     #remove scene_update
     bpy.app.handlers.scene_update_post.remove(scene_update)
-    bpy.utils.unregister_class(Coordinate_system_Panel)
+    bpy.utils.unregister_class(Mathematics_Transform_Panel)
     
 if __name__ == "__main__":
     register()
