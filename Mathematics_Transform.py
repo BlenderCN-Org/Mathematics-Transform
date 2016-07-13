@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Mathematics Transform",
     "author": "Stokes Lee",
-    "version": (0, 0,2),
+    "version": (0, 1,2),
     "blender": (2, 70, 0),
     "location": "View 3D > Properties Shelf",
     "category": "3D View"
