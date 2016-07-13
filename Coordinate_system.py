@@ -5,36 +5,36 @@ from bpy.props import *
 
 Coordinates_items = [("None","None","None"),
     ("Sphere_Coordinate","Sphere_Coordinate","Sphere_Coordinate"),
-    ("Cylindrical_Coordinate","Cylindrical_Coordinate","Cylindrical_Coordinate")]
+    ("Cylindrical_Coordinate","Cylindrical_Coordinate","Cylindrical_Coordinate"),
+    ("Cartesian_Coordinate","Cartesian_Coordinate","Cartesian_Coordinate")]
 
 #更動求座標系時呼叫來更動active_object座標系之函數       
 def update_Cartesian(coordinate, context):
     if(coordinate == 'Sphere_Coordinate'):
-        #print("!@@")
-        Sphere_Coordinate = context.Mathematics_Coordinates_System.Sphere_Coordinate
+        Sphere_Coordinate = bpy.context.scene.Mathematics_Coordinates_System.Sphere_Coordinate
         r = Sphere_Coordinate.radius
         polar = math.radians(Sphere_Coordinate.polar)
         azimuth = math.radians(Sphere_Coordinate.azimuth)
         x = r*math.sin(polar)*math.cos(azimuth)
         y = r*math.sin(polar)*math.sin(azimuth)
         z = r*math.cos(polar)
-        context.objects.active.location.x = x
-        context.objects.active.location.y = y
-        context.objects.active.location.z = z
+        bpy.context.scene.objects.active.location.x = x
+        bpy.context.scene.objects.active.location.y = y
+        bpy.context.scene.objects.active.location.z = z
         
     if(coordinate == 'Cylindrical_Coordinate'):
-        Cylindrical_Coordinate = context.Mathematics_Coordinates_System.Cylindrical_Coordinate
+        Cylindrical_Coordinate = bpy.context.scene.Mathematics_Coordinates_System.Cylindrical_Coordinate
         r = Cylindrical_Coordinate.radius
         azimuth = math.radians(Cylindrical_Coordinate.azimuth)
         x = r*math.cos(azimuth)
         y = r*math.sin(azimuth)
-        context.objects.active.location.x = x
-        context.objects.active.location.y = y
-        context.objects.active.location.z = Cylindrical_Coordinate.height
+        bpy.context.scene.objects.active.location.x = x
+        bpy.context.scene.objects.active.location.y = y
+        bpy.context.scene.objects.active.location.z = Cylindrical_Coordinate.height
         
 #預期用來修改球座標系的函數
 def update_Sphere(context):
-    ob = context.objects.active.location
+    ob = bpy.context.scene.objects.active.location
     radius = ob.length
     if ob.x == 0:
         if ob.y >=0:
@@ -43,7 +43,7 @@ def update_Sphere(context):
             azimuth = -90
     else:
         azimuth = math.degrees(math.atan2(ob.y,ob.x))
-    Sphere_Coordinate = context.Mathematics_Coordinates_System.Sphere_Coordinate
+    Sphere_Coordinate = bpy.context.scene.Mathematics_Coordinates_System.Sphere_Coordinate
     Sphere_Coordinate.radius = radius
     if radius != 0:
         t = ob.z/radius
@@ -60,8 +60,8 @@ def update_Sphere(context):
     Sphere_Coordinate.modify_by_Cartesian = True
     
 def update_Cylindrical(context):
-    ob = context.objects.active.location
-    Cylindrical_Coordinate = context.Mathematics_Coordinates_System.Cylindrical_Coordinate
+    ob = bpy.context.scene.objects.active.location
+    Cylindrical_Coordinate = bpy.context.scene.Mathematics_Coordinates_System.Cylindrical_Coordinate
     Cylindrical_Coordinate.radius = math.sqrt(math.pow(ob.y,2)+math.pow(ob.x,2))
     if ob.x == 0:
         if ob.y >=0:
@@ -75,28 +75,30 @@ def update_Cylindrical(context):
     Cylindrical_Coordinate.modify_by_Cartesian = True
     
 def scene_update(context):
-    updated_Coordinate = context.Mathematics_Coordinates_System.updated_Coordinate
-    print(updated_Coordinate)
-    if context.objects.active.is_updated: 
-        updated_Coordinate = "Cartesian_Coordinate"
-    if updated_Coordinate != "None":
-        #print("!!!")
-        if updated_Coordinate == "Cartesian_Coordinate":
+    Mathematics_Coordinates_System = bpy.context.scene.Mathematics_Coordinates_System
+    if bpy.context.scene.objects.active.is_updated: 
+        if Mathematics_Coordinates_System.updated_Coordinate == "None":
+            Mathematics_Coordinates_System.updated_Coordinate = "Cartesian_Coordinate"
+        else:
+            Mathematics_Coordinates_System.updated_Coordinate = "None"
+    if Mathematics_Coordinates_System.updated_Coordinate != "None":
+        if Mathematics_Coordinates_System.updated_Coordinate == "Cartesian_Coordinate":
             update_Cylindrical(context)
             update_Sphere(context)
-        elif updated_Coordinate == "Cylindrical_Coordinate":
+        elif Mathematics_Coordinates_System.updated_Coordinate == "Cylindrical_Coordinate":
             update_Sphere(context)
-            update_Cartesian(updated_Coordinate, context)
-            #print(updated_Coordinate)
-        elif updated_Coordinate == "Sphere_Coordinate":
+            update_Cartesian("Cylindrical_Coordinate", context)
+        elif Mathematics_Coordinates_System.updated_Coordinate == "Sphere_Coordinate":
             update_Cylindrical(context)
-            update_Cartesian(updated_Coordinate, context)
-        updated_Coordinate ="None"
+            update_Cartesian("Sphere_Coordinate", context)
         
 #將放在scene下的一個PropertyGroup，用來儲存半徑、天頂角、方位角的數值
 def Coordinate_Property_update(self, context):
-    #print("!!!!##")
-    bpy.context.scene.Mathematics_Coordinates_System.updated_Coordinate = self.__class__.__name__
+    Mathematics_Coordinates_System = bpy.context.scene.Mathematics_Coordinates_System
+    if Mathematics_Coordinates_System.updated_Coordinate == "None":
+        Mathematics_Coordinates_System.updated_Coordinate = self.__class__.__name__
+    else:
+        Mathematics_Coordinates_System.updated_Coordinate = "None"
     
 class Sphere_Coordinate(bpy.types.PropertyGroup):
     radius = FloatProperty(
