@@ -53,6 +53,7 @@ def scene_update(context):
     if bpy.context.active_object.is_updated:
         #update_Cylindrical(context)
         update_Sphere(context)
+        update_Cylindrical(context)
 #Cartesian coordinate
 #將放在scene下的一個PropertyGroup，用來儲存半徑、天頂角、方位角的數值
 class Sphere_Coordinate(bpy.types.PropertyGroup):
