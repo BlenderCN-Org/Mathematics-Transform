@@ -123,15 +123,17 @@ class Coordinate_updater():
     def update_Cylindrical(self):
         ob = bpy.context.scene.objects.active.location
         Coordinate_variable = bpy.context.scene.Mathematics_Coordinates_System.Coordinate_variable
-        Coordinate_variable.Cylindrical_radius = math.sqrt(math.pow(ob.y,2)+math.pow(ob.x,2))
+        x = ob.x
+        y = ob.y
         
-        if ob.x == 0:
-            if ob.y >= 0:
+        Coordinate_variable.Cylindrical_radius = math.sqrt(math.pow(y,2)+math.pow(x,2))
+        if x == 0:
+            if y >= 0:
                 Coordinate_variable.azimuth = 90  
             else:
                 Coordinate_variable.azimuth = -90          
         else:
-            Coordinate_variable.azimuth = math.degrees(math.atan2(ob.y,ob.x))
+            Coordinate_variable.azimuth = math.degrees(math.atan2(y,x))
 Coordinate_Property_update = Coordinate_updater()
 
 #在scene底下存放座標變量的PropertyGroup
