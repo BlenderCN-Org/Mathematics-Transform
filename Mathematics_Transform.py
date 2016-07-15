@@ -71,8 +71,8 @@ class Coordinate_updater():
                 ob.z = Sph_r*math.cos(Sph_t1)
                 self.update_Cartesian("Sphere_radius")
             elif self.updated_Prop == "azimuth":
-                ob.x = Coordinate_variable.Cylindrical_radius*math.cos(t2)
-                ob.y = Coordinate_variable.Cylindrical_radius*math.sin(t2)
+                ob.x = Cy_r*math.cos(t2)
+                ob.y = Cy_r*math.sin(t2)
             self.update_request = False
         else:
             self.updated_Prop = None
