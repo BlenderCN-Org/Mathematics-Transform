@@ -143,6 +143,10 @@ class Coordinate_variable(bpy.types.PropertyGroup):
 #數學座標系統的類別
 class Mathematics_Coordinates_System(bpy.types.PropertyGroup):
     Chosen_Coordinate = EnumProperty(items = Coordinates_items, default = "None")
+<<<<<<< HEAD
+=======
+    updated_variable = EnumProperty(items = Coordinates_variables_items, default = None )
+>>>>>>> v0.1.2
     Coordinate_variable = bpy.props.PointerProperty(type = Coordinate_variable)
     
 #UI部分
