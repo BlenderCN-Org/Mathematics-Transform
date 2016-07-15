@@ -36,74 +36,86 @@ class Coordinate_updater():
         self.update_request = False
         self.updated_Prop = None
     def __call__(self,updated_variable):
-        if not self.updated_Prop:
-            self.updated_Prop = updated_variable    
-            self.update_request = True
-        self.update_request = True
+            if not self.updated_Prop:
+                self.updated_Prop = updated_variable    
+                self.update_request = True
+            if updated_variable == self.update_request:
+                self.update_request = True
     def update(self):
         if self.update_request:
             Mathematics_Coordinates_System = bpy.context.scene.Mathematics_Coordinates_System
             Coordinate_variable = bpy.context.scene.Mathematics_Coordinates_System.Coordinate_variable
             ob = bpy.context.scene.objects.active.location
+            x = ob.x
+            y = ob.y
+            z = ob.z
+            Sph_r = Coordinate_variable.Sphere_radius
+            Sph_t1 = math.radians(Coordinate_variable.Sphere_polar)
+            Cy_r = Coordinate_variable.Cylindrical_radius
+            t2 = math.radians(Coordinate_variable.azimuth)
+            
             if self.updated_Prop == "Cartesian_Coordinate_variable":
                 self.update_Cylindrical()
                 self.update_Sphere()
             elif self.updated_Prop == "Cylindrical_radius":
-                Coordinate_variable.Sphere_radius = math.sqrt(math.pow(ob.z,2)+math.pow(Coordinate_variable.Cylindrical_radius,2))
-                if ob.z !=0 :
-                    Coordinate_variable.Sphere_polar = math.degrees(math.atan2(Coordinate_variable.Cylindrical_radius,ob.z))
+                Coordinate_variable.Sphere_radius = math.sqrt(math.pow(z,2)+math.pow(Cy_r,2))
+                if z !=0 :
+                    Coordinate_variable.Sphere_polar = math.degrees(math.atan2(Cy_r,z))
                 self.update_Cartesian("Cylindrical_radius")
             elif self.updated_Prop == "Sphere_polar":
-                Coordinate_variable.Cylindrical_radius = Coordinate_variable.Sphere_radius*math.sin(math.radians(Coordinate_variable.Sphere_polar))
-                ob.z = Coordinate_variable.Sphere_radius*math.cos(math.radians(Coordinate_variable.Sphere_polar))
+                Coordinate_variable.Cylindrical_radius = Sph_r*math.sin(Sph_t1)
+                ob.z = Sph_r*math.cos(Sph_t1)
                 self.update_Cartesian("Sphere_polar")
             elif self.updated_Prop == "Sphere_radius":
-                Coordinate_variable.Cylindrical_radius = Coordinate_variable.Sphere_radius*math.sin(math.radians(Coordinate_variable.Sphere_polar))
-                ob.z = Coordinate_variable.Sphere_radius*math.cos(math.radians(Coordinate_variable.Sphere_polar))
+                Coordinate_variable.Cylindrical_radius = Sph_r*math.sin(Sph_t1)
+                ob.z = Sph_r*math.cos(Sph_t1)
                 self.update_Cartesian("Sphere_radius")
             elif self.updated_Prop == "azimuth":
-                ob = bpy.context.scene.objects.active.location
-                Coordinate_variable = bpy.context.scene.Mathematics_Coordinates_System.Coordinate_variable
-                ob.x = Coordinate_variable.Cylindrical_radius*math.cos(math.radians(Coordinate_variable.azimuth))
-                ob.y = Coordinate_variable.Cylindrical_radius*math.sin(math.radians(Coordinate_variable.azimuth))
+                ob.x = Cy_r*math.cos(t2)
+                ob.y = Cy_r*math.sin(t2)
             self.update_request = False
         else:
             self.updated_Prop = None
     def update_Cartesian(self,variable):
+        ob = bpy.context.scene.objects.active.location
+        Coordinate_variable = bpy.context.scene.Mathematics_Coordinates_System.Coordinate_variable
+        Sph_r = Coordinate_variable.Sphere_radius
+        Sph_t1 = math.radians(Coordinate_variable.Sphere_polar)
+        Cy_r = Coordinate_variable.Cylindrical_radius
+        t2 = math.radians(Coordinate_variable.azimuth)
+        
         if (variable == "Sphere_radius")|(variable == "Sphere_polar"):
-            Coordinate_variable = bpy.context.scene.Mathematics_Coordinates_System.Coordinate_variable
-            r = Coordinate_variable.Sphere_radius
-            x = r*math.sin(math.radians(Coordinate_variable.Sphere_polar))*math.cos(math.radians(Coordinate_variable.azimuth))
-            y = r*math.sin(math.radians(Coordinate_variable.Sphere_polar))*math.sin(math.radians(Coordinate_variable.azimuth))
-            z = r*math.cos(math.radians(Coordinate_variable.Sphere_polar))
-            bpy.context.scene.objects.active.location.x = x
-            bpy.context.scene.objects.active.location.y = y
-            bpy.context.scene.objects.active.location.z = z
+            x = Sph_r*math.sin(Sph_t1)*math.cos(t2)
+            y = Sph_r*math.sin(Sph_t1)*math.sin(t2)
+            z = Sph_r*math.cos(Sph_t1)
+            ob.x = x
+            ob.y = y
+            ob.z = z
         elif variable == "Cylindrical_radius":
-            Coordinate_variable = bpy.context.scene.Mathematics_Coordinates_System.Coordinate_variable
-            r = Coordinate_variable.Cylindrical_radius
-            bpy.context.scene.objects.active.location.x = r*math.cos(math.radians(Coordinate_variable.azimuth))
-            bpy.context.scene.objects.active.location.y = r*math.sin(math.radians(Coordinate_variable.azimuth))
+            ob.x = Cy_r*math.cos(t2)
+            ob.y = Cy_r*math.sin(t2)
 
     def update_Sphere(self):
         ob = bpy.context.scene.objects.active.location
         Coordinate_variable = bpy.context.scene.Mathematics_Coordinates_System.Coordinate_variable
-        Sphere_radius = ob.length
-        if ob.x == 0:
-            if ob.y >= 0:
+        x = ob.x
+        y = ob.y
+        z = ob.z
+        Shp_r = ob.length
+        
+        if x == 0:
+            if y >= 0:
                 Coordinate_variable.azimuth = 90  
             else:
                 Coordinate_variable.azimuth = -90          
         else:
-            Coordinate_variable.azimuth = math.degrees(math.atan2(ob.y,ob.x))
-        Coordinate_variable.Sphere_radius = Sphere_radius
-        if Sphere_radius != 0:
-            t = ob.z/Sphere_radius
+            Coordinate_variable.azimuth = math.degrees(math.atan2(y,x))
+        Coordinate_variable.Sphere_radius = Shp_r
+        if Shp_r != 0:
+            t = z/Shp_r
             if t >= 1:
-                Sphere_radius = ob.z
                 Coordinate_variable.Sphere_polar =0
             elif t <= -1:
-                Sphere_radius = ob.z
                 Coordinate_variable.Sphere_polar =180
             else:
                 Coordinate_variable.Sphere_polar = math.degrees(math.acos(t))
@@ -111,14 +123,17 @@ class Coordinate_updater():
     def update_Cylindrical(self):
         ob = bpy.context.scene.objects.active.location
         Coordinate_variable = bpy.context.scene.Mathematics_Coordinates_System.Coordinate_variable
-        Coordinate_variable.Cylindrical_radius = math.sqrt(math.pow(ob.y,2)+math.pow(ob.x,2))
-        if ob.x == 0:
-            if ob.y >= 0:
+        x = ob.x
+        y = ob.y
+        
+        Coordinate_variable.Cylindrical_radius = math.sqrt(math.pow(y,2)+math.pow(x,2))
+        if x == 0:
+            if y >= 0:
                 Coordinate_variable.azimuth = 90  
             else:
                 Coordinate_variable.azimuth = -90          
         else:
-            Coordinate_variable.azimuth = math.degrees(math.atan2(ob.y,ob.x))
+            Coordinate_variable.azimuth = math.degrees(math.atan2(y,x))
 Coordinate_Property_update = Coordinate_updater()
 
 #在scene底下存放座標變量的PropertyGroup
@@ -154,19 +169,21 @@ class Mathematics_Transform_Panel(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        
         scene = context.scene
+        Coordinate_variable = scene.Mathematics_Coordinates_System.Coordinate_variable
+        ob = bpy.context.scene.objects.active
+        
         layout.column().prop(scene.Mathematics_Coordinates_System,"Chosen_Coordinate",text = "")
         if scene.Mathematics_Coordinates_System.Chosen_Coordinate == "Sphere_Coordinate":
             col = layout.column()
-            col.prop(scene.Mathematics_Coordinates_System.Coordinate_variable, "Sphere_radius")
-            col.prop(scene.Mathematics_Coordinates_System.Coordinate_variable, "Sphere_polar")
-            col.prop(scene.Mathematics_Coordinates_System.Coordinate_variable, "azimuth")
+            col.prop(Coordinate_variable, "Sphere_radius")
+            col.prop(Coordinate_variable, "Sphere_polar")
+            col.prop(Coordinate_variable, "azimuth")
         elif scene.Mathematics_Coordinates_System.Chosen_Coordinate == "Cylindrical_Coordinate":
             col = layout.column()
-            col.prop(scene.Mathematics_Coordinates_System.Coordinate_variable, "Cylindrical_radius")
-            col.prop(scene.Mathematics_Coordinates_System.Coordinate_variable, "azimuth")
-            col.prop(bpy.context.scene.objects.active, "location", index = 2, text = "z")
+            col.prop(Coordinate_variable, "Cylindrical_radius")
+            col.prop(Coordinate_variable, "azimuth")
+            col.prop(ob, "location", index = 2, text = "z")
         elif scene.Mathematics_Coordinates_System.Chosen_Coordinate == "Cartesian_Coordinate":
             col = layout.column()
             col.prop(bpy.context.scene.objects.active, "location", text = "")
