@@ -167,19 +167,21 @@ class Mathematics_Transform_Panel(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        
         scene = context.scene
+        Coordinate_variable = scene.Mathematics_Coordinates_System.Coordinate_variable
+        ob = bpy.context.scene.objects.active
+        
         layout.column().prop(scene.Mathematics_Coordinates_System,"Chosen_Coordinate",text = "")
         if scene.Mathematics_Coordinates_System.Chosen_Coordinate == "Sphere_Coordinate":
             col = layout.column()
-            col.prop(scene.Mathematics_Coordinates_System.Coordinate_variable, "Sphere_radius")
-            col.prop(scene.Mathematics_Coordinates_System.Coordinate_variable, "Sphere_polar")
-            col.prop(scene.Mathematics_Coordinates_System.Coordinate_variable, "azimuth")
+            col.prop(Coordinate_variable, "Sphere_radius")
+            col.prop(Coordinate_variable, "Sphere_polar")
+            col.prop(Coordinate_variable, "azimuth")
         elif scene.Mathematics_Coordinates_System.Chosen_Coordinate == "Cylindrical_Coordinate":
             col = layout.column()
-            col.prop(scene.Mathematics_Coordinates_System.Coordinate_variable, "Cylindrical_radius")
-            col.prop(scene.Mathematics_Coordinates_System.Coordinate_variable, "azimuth")
-            col.prop(bpy.context.scene.objects.active, "location", index = 2, text = "z")
+            col.prop(Coordinate_variable, "Cylindrical_radius")
+            col.prop(Coordinate_variable, "azimuth")
+            col.prop(ob, "location", index = 2, text = "z")
         elif scene.Mathematics_Coordinates_System.Chosen_Coordinate == "Cartesian_Coordinate":
             col = layout.column()
             col.prop(bpy.context.scene.objects.active, "location", text = "")
