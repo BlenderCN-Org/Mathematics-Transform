@@ -188,10 +188,11 @@ class Mathematics_Transform_Panel(bpy.types.Panel):
             col.prop(bpy.context.scene.objects.active, "location", text = "")
             
         if Mathematics_Transform_Reference.is_enabled:
-            layout.operator("view3d.mathematics_transform_reference", "Stop", icon="PAUSE")
+            layout.operator("view3d.mathematics_transform_reference", "關閉參考線", icon="PAUSE")
         else:
-            layout.operator("view3d.mathematics_transform_reference", "Start", icon="PLAY")
+            layout.operator("view3d.mathematics_transform_reference", "開啟參考線", icon="PLAY")
 
+#參考線部分
 def frange(start, stop, step):
  i = start
  while i < stop:
