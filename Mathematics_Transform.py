@@ -7,7 +7,9 @@ bl_info = {
     "category": "3D View"
 }
 import bpy
+from bpy_extras.view3d_utils import location_3d_to_region_2d, region_2d_to_vector_3d
 import mathutils
+from mathutils import Vector
 import math
 from bpy.props import *
 from bpy.app.handlers import persistent
@@ -210,24 +212,41 @@ class Mathematics_Transform_Reference(bpy.types.Operator):
 
     def draw_Cartesian(self):#vertices):
         ob = bpy.context.scene.objects.active.location
+        rgn = bpy.context.region
+        rv3d = bpy.context.space_data.region_3d
         #bgl.glClear()
+        
         bgl.glEnable(bgl.GL_BLEND)
         bgl.glLineWidth(4)    
         bgl.glBegin(bgl.GL_LINE_STRIP)
-        bgl.glVertex3f(0,0,0)
+        v3d = Vector((0, 0, 0))
+        v2d = location_3d_to_region_2d(rgn, rv3d, v3d)
+        bgl.glVertex2f(*v2d)
         bgl.glColor4f(100, 0.0, 0.0, 1)
-        bgl.glVertex3f(ob.x,0,0)
+        v3d = mathutils.Vector((ob.x,0,0))
+        v2d = location_3d_to_region_2d(rgn, rv3d, v3d)
+        bgl.glVertex2f(*v2d)
         bgl.glColor4f(0, 100.0, 0.0, 1)
-        bgl.glVertex3f(ob.x,ob.y,0)
+        v3d = mathutils.Vector((ob.x,ob.y,0))
+        v2d = location_3d_to_region_2d(rgn, rv3d, v3d)
+        bgl.glVertex2f(*v2d)
         bgl.glColor4f(0, 0.0, 100.0, 1)
-        bgl.glVertex3f(ob.x,ob.y,ob.z)
+        v3d = mathutils.Vector((ob.x,ob.y,ob.z))
+        v2d = location_3d_to_region_2d(rgn, rv3d, v3d)
+        bgl.glVertex2f(*v2d)
         bgl.glEnd()
         bgl.glLineWidth(1)
         bgl.glDisable(bgl.GL_BLEND)
-        #bgl.glColor4f(0.0, 0.0, 0.0, 1.0)
-
+        
+        bgl.glColor4f(1, 1, 1, 1)
+        self.draw_value(Vector((ob.x/2,0,0)), str(round(ob.x, 2)))
+        self.draw_value(Vector((ob.x, ob.y/2, 0)), str(round(ob.y, 2)))
+        self.draw_value(Vector((ob.x, ob.y, ob.z/2)), str(round(ob.z, 2)))
+        
     def draw_Sphere(self):#vertices):
         ob = bpy.context.scene.objects.active.location
+        rgn = bpy.context.region
+        rv3d = bpy.context.space_data.region_3d
         Mathematics_Coordinates_System = bpy.context.scene.Mathematics_Coordinates_System
         Coordinate_variable = bpy.context.scene.Mathematics_Coordinates_System.Coordinate_variable
         Sph_r = Coordinate_variable.Sphere_radius
@@ -239,11 +258,17 @@ class Mathematics_Transform_Reference(bpy.types.Operator):
         bgl.glEnable(bgl.GL_BLEND)
         bgl.glLineWidth(4)    
         bgl.glBegin(bgl.GL_LINE_STRIP)
-        bgl.glVertex3f(0,0,0)
+        v3d = Vector((0, 0, 0))
+        v2d = location_3d_to_region_2d(rgn, rv3d, v3d)
+        bgl.glVertex2f(*v2d)
+        
         bgl.glColor4f(0, 0, 1, 1)
-        bgl.glVertex3f(0,0,Sph_r)
+        v3d = Vector((0,0,Sph_r))
+        v2d = location_3d_to_region_2d(rgn, rv3d, v3d)
+        bgl.glVertex2f(*v2d)
         bgl.glColor4f(0, 1, 1, 1)
 
+        
         
         a = Sph_t1
         b = math.pi/(300*Sph_r)
@@ -252,10 +277,14 @@ class Mathematics_Transform_Reference(bpy.types.Operator):
             x = Sph_r*math.sin(t)
             y = 0
             z = Sph_r*math.cos(t)
-            bgl.glVertex3f(x,y,z)
+            v3d = Vector((x,y,z))
+            v2d = location_3d_to_region_2d(rgn, rv3d, v3d)
+            bgl.glVertex2f(*v2d)
         
+           
+        
+
         bgl.glColor4f(1, 0, 1, 1)
-        
         if t2 >= 0 :
             c = t2
         else:
@@ -270,15 +299,35 @@ class Mathematics_Transform_Reference(bpy.types.Operator):
                 x = Sph_r*math.sin(a)*math.cos(-t)
                 y = Sph_r*math.sin(a)*math.sin(-t)
             z = Sph_r*math.cos(a)
-            bgl.glVertex3f(x,y,z)
+            v3d = Vector((x,y,z))
+            v2d = location_3d_to_region_2d(rgn, rv3d, v3d)
+            bgl.glVertex2f(*v2d)
             
         bgl.glEnd()
         bgl.glLineWidth(1)
         bgl.glDisable(bgl.GL_BLEND)
-        #bgl.glColor4f(0.0, 0.0, 0.0, 1.0)
+        bgl.glColor4f(1, 1, 1, 1)
+        
+        
+        self.draw_value(Vector((0,0,Sph_r/2)),str(round(Sph_r, 2)))
+        x1 = Sph_r*math.sin(Sph_t1/2)
+        y1 = 0
+        z1 = Sph_r*math.cos(Sph_t1/2) 
+        self.draw_value(Vector((x1,y1,z1)),str(round(math.degrees(Sph_t1), 2))+"°")
+        if(t2 >= 0):
+            x1 = Sph_r*math.sin(a)*math.cos((c+d)/2)
+            y1 = Sph_r*math.sin(a)*math.sin((c+d)/2)
+        else:
+            x1 = Sph_r*math.sin(a)*math.cos(-(c+d)/2)
+            y1 = Sph_r*math.sin(a)*math.sin(-(c+d)/2)
+        z1 = Sph_r*math.cos(a) 
+        self.draw_value(Vector((x1,y1,z1)),str(round(math.degrees(t2), 2))+"°")
+        
 
     def draw_Cylindrical(self):#vertices):
         ob = bpy.context.scene.objects.active.location
+        rgn = bpy.context.region
+        rv3d = bpy.context.space_data.region_3d
         Mathematics_Coordinates_System = bpy.context.scene.Mathematics_Coordinates_System
         Coordinate_variable = bpy.context.scene.Mathematics_Coordinates_System.Coordinate_variable
         Sph_r = Coordinate_variable.Sphere_radius
@@ -289,14 +338,19 @@ class Mathematics_Transform_Reference(bpy.types.Operator):
         bgl.glEnable(bgl.GL_BLEND)
         bgl.glLineWidth(4)    
         bgl.glBegin(bgl.GL_LINE_STRIP)
-        bgl.glVertex3f(0,0,0)
+        v3d = Vector((0, 0, 0))
+        v2d = location_3d_to_region_2d(rgn, rv3d, v3d)
+        bgl.glVertex2f(*v2d)
         bgl.glColor4f(1, 0.0, 0, 1)
-        bgl.glVertex3f(Cy_r,0,0)
+        v3d = Vector((Cy_r,0,0))
+        v2d = location_3d_to_region_2d(rgn, rv3d, v3d)
+        bgl.glVertex2f(*v2d)
         bgl.glColor4f(1, 0, 1, 1)
         if t2 >= 0 :
             a = t2
         else:
             a = -t2
+         
         b = math.pi/(300*Cy_r)
         for t in frange(0,a,b):
             
@@ -307,14 +361,42 @@ class Mathematics_Transform_Reference(bpy.types.Operator):
                 x = Cy_r*math.cos(-t)
                 y = Cy_r*math.sin(-t)
             z = 0
-            bgl.glVertex3f(x,y,z)
+            v3d = Vector((x,y,z))
+            v2d = location_3d_to_region_2d(rgn, rv3d, v3d)
+            bgl.glVertex2f(*v2d)
         bgl.glColor4f(0, 0.0, 1, 1)
-        #bgl.glVertex3f(ob.x,ob.y,ob.z)
-        bgl.glVertex3f(ob.x,ob.y,ob.z)
+        v3d = Vector((ob.x,ob.y,ob.z))
+        v2d = location_3d_to_region_2d(rgn, rv3d, v3d)
+        bgl.glVertex2f(*v2d)
         bgl.glEnd()
         bgl.glLineWidth(1)
         bgl.glDisable(bgl.GL_BLEND)
-        #bgl.glColor4f(0.0, 0.0, 0.0, 1.0)
+        
+        bgl.glColor4f(1, 1, 1, 1)
+        self.draw_value(Vector((Cy_r/2,0, 0)),str(round(Cy_r, 2)))
+        x1 = 0
+        y1 = 0
+        z1 = 0
+        if(t2 >= 0):
+            x1 = Cy_r*math.cos(a/2)
+            y1 = Cy_r*math.sin(a/2)
+        else:
+            x1 = Cy_r*math.cos(-a/2)
+            y1 = Cy_r*math.sin(-a/2)
+        z1 = 0
+        self.draw_value(Vector((x1,y1,z1)),str(round(math.degrees(t2),2))+"°")
+        self.draw_value(Vector((ob.x,ob.y,ob.z/2)),str(round(ob.z, 2)))
+        
+    def draw_value(self, v3d, value):
+        #ob = bpy.context.scene.objects.active.location
+        rgn = bpy.context.region
+        rv3d = bpy.context.space_data.region_3d
+        
+        #v3d = mathutils.Vector((ob.x, ob.y, ob.z/2))
+        v2d = location_3d_to_region_2d(rgn, rv3d, v3d)
+        blf.size(0, 30, 72)        
+        blf.position(0,*v2d, 0)  
+        blf.draw(0, value) 
     @staticmethod
     def draw_callback_px(self, context):
         scene = bpy.context.scene
@@ -329,7 +411,7 @@ class Mathematics_Transform_Reference(bpy.types.Operator):
     @staticmethod
     def handle_add(self, context):
         Mathematics_Transform_Reference._handle_draw = bpy.types.SpaceView3D.draw_handler_add(
-                self.draw_callback_px, (self, context), 'WINDOW', 'POST_VIEW')
+                self.draw_callback_px, (self, context), 'WINDOW', 'POST_PIXEL')
 
     @staticmethod
     def handle_remove():
